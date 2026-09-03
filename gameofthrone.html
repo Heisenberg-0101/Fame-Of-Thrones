@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emberfall — Where Ice and Fire Collide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cormorant+SC:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <style>
+      
+  :root{
+    --void:#07080d;
+    --void-2:#0e1016;
+    --void-3:#161822;
+    --ember:#ff6a3d;
+    --ember-dim:#a83e1f;
+    --frost:#8fd8ff;
+    --frost-dim:#4f7f99;
+    --teal:#2f9e8f;
+    --violet:#8577b5;
+    --parchment:#d9c9a3;
+    --iron:#3d4048;
+    --font-display:'Cinzel',serif;
+    --font-utility:'Cormorant SC',serif;
+    --font-body:'EB Garamond',serif;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:auto;}
+  @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth;} }
+
+  body{
+    background:var(--void);
+    color:var(--parchment);
+    font-family:var(--font-body);
+    line-height:1.6;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit;text-decoration:none;}
+  img,svg{display:block;max-width:100%;}
+  ul{list-style:none;}
+
+  .skip-link{position:absolute;left:-999px;top:0;background:var(--ember);color:var(--void);padding:.6rem 1rem;z-index:200;}
+  .skip-link:focus{left:1rem;top:1rem;}
+  :focus-visible{outline:2px solid var(--frost);outline-offset:3px;}
+
+  /* ---- Global scroll chrome ---- */
+  .scroll-track{position:fixed;top:0;left:0;width:100%;height:3px;background:rgba(255,255,255,.05);z-index:200;}
+  .scroll-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--ember),var(--frost));}
+
+  .tint-layer{position:fixed;inset:0;pointer-events:none;z-index:1;}
+  .tint-warm{background:radial-gradient(ellipse 70% 40% at 50% -5%, rgba(255,106,61,1), transparent 70%);opacity:.14;}
+  .tint-cool{background:radial-gradient(ellipse 70% 40% at 50% 105%, rgba(143,216,255,1), transparent 70%);opacity:0;}
+
+  .eyebrow{font-family:var(--font-utility);font-size:.85rem;letter-spacing:.28em;text-transform:uppercase;color:var(--frost);font-weight:600;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 6vw;position:relative;z-index:2;}
+
+  /* ---- Nav ---- */
+  header{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.6rem 6vw;display:flex;justify-content:space-between;align-items:center;transition:background .4s var(--ease),padding .4s var(--ease),backdrop-filter .4s var(--ease);}
+  header.scrolled{background:rgba(7,8,13,.82);backdrop-filter:blur(10px);padding:1rem 6vw;border-bottom:1px solid rgba(255,255,255,.06);}
+  .logo{font-family:var(--font-display);font-weight:900;font-size:1.15rem;letter-spacing:.12em;background:linear-gradient(90deg,var(--ember),var(--frost));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  nav.primary-nav ul{display:flex;gap:2.2rem;}
+  nav.primary-nav a{font-family:var(--font-utility);font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--parchment);opacity:.8;transition:opacity .25s,color .25s;position:relative;}
+  nav.primary-nav a::after{content:'';position:absolute;left:0;bottom:-6px;width:0;height:1px;background:var(--ember);transition:width .3s var(--ease);}
+  nav.primary-nav a:hover{opacity:1;color:var(--ember);}
+  nav.primary-nav a:hover::after{width:100%;}
+  nav.primary-nav a.active{color:var(--frost);opacity:1;}
+  nav.primary-nav a.active::after{width:100%;background:var(--frost);}
+  .nav-toggle{display:none;background:none;border:1px solid var(--iron);color:var(--parchment);width:40px;height:40px;border-radius:2px;cursor:pointer;font-size:1rem;}
+
+  @media (max-width:760px){
+    nav.primary-nav{position:fixed;top:0;right:0;height:100vh;width:min(72vw,300px);background:var(--void-2);transform:translateX(100%);transition:transform .4s var(--ease);padding:6rem 2rem 2rem;border-left:1px solid var(--iron);}
+    nav.primary-nav.open{transform:translateX(0);}
+    nav.primary-nav ul{flex-direction:column;gap:1.8rem;}
+    .nav-toggle{display:block;}
+  }
+
+  /* ---- Hero ---- */
+  .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 6vw 4rem;overflow:hidden;background:radial-gradient(ellipse at 50% 20%, rgba(255,106,61,.10), transparent 55%),radial-gradient(ellipse at 50% 85%, rgba(143,216,255,.08), transparent 55%),var(--void);}
+  #particleCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:.75;will-change:transform;}
+  .hero-inner{position:relative;z-index:2;will-change:transform;}
+  .hero .eyebrow{display:inline-block;margin-bottom:1.4rem;opacity:0;transform:translateY(10px);animation:riseIn .8s .1s var(--ease) forwards;}
+  .hero-title{font-family:var(--font-display);font-weight:900;font-size:clamp(3rem,10vw,7.2rem);letter-spacing:.03em;line-height:.95;display:flex;justify-content:center;flex-wrap:wrap;}
+  .hero-title span{display:inline-block;opacity:0;transform:translateY(24px);animation:riseIn .8s var(--ease) forwards;}
+  .hero-title span.flame{background:linear-gradient(180deg,#ffcf9e,var(--ember) 55%,var(--ember-dim));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 24px rgba(255,106,61,.35);}
+  .hero-title span.frost{background:linear-gradient(180deg,#eafaff,var(--frost) 55%,var(--frost-dim));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 24px rgba(143,216,255,.35);}
+  @media (prefers-reduced-motion:no-preference){
+    .hero-title span.flame{animation:riseIn .8s var(--ease) forwards, flicker 3.6s ease-in-out infinite;}
+    .hero-title span.frost{animation:riseIn .8s var(--ease) forwards, shimmer 4.2s ease-in-out infinite;}
+  }
+  @keyframes riseIn{to{opacity:1;transform:translateY(0);}}
+  @keyframes flicker{0%,100%{filter:brightness(1);}50%{filter:brightness(1.18);}}
+  @keyframes shimmer{0%,100%{filter:brightness(1);}50%{filter:brightness(1.12) saturate(1.1);}}
+  .hero-sub{font-style:italic;font-size:clamp(1rem,2vw,1.25rem);color:var(--parchment);opacity:0;max-width:520px;margin:1.6rem auto 2.6rem;animation:riseIn .8s .5s var(--ease) forwards;}
+  .cta-row{display:flex;gap:1.6rem;align-items:center;justify-content:center;flex-wrap:wrap;opacity:0;animation:riseIn .8s .7s var(--ease) forwards;}
+  .btn-primary{font-family:var(--font-utility);letter-spacing:.14em;text-transform:uppercase;font-size:.85rem;padding:.95rem 2.1rem;background:linear-gradient(90deg,var(--ember-dim),var(--ember));color:var(--void);border-radius:2px;border:1px solid transparent;transition:transform .3s var(--ease),box-shadow .3s var(--ease);display:inline-block;}
+  .btn-primary:hover{transform:translateY(-3px);box-shadow:0 10px 26px -8px rgba(255,106,61,.55);}
+  .btn-ghost{font-family:var(--font-utility);letter-spacing:.14em;text-transform:uppercase;font-size:.85rem;color:var(--frost);border-bottom:1px solid rgba(143,216,255,.4);padding-bottom:2px;transition:border-color .3s;}
+  .btn-ghost:hover{border-color:var(--frost);}
+  .scroll-cue{position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);width:22px;height:34px;border:1px solid var(--iron);border-radius:12px;display:flex;justify-content:center;padding-top:6px;}
+  .scroll-cue::before{content:'';width:3px;height:6px;border-radius:2px;background:var(--parchment);}
+  @media (prefers-reduced-motion:no-preference){ .scroll-cue::before{animation:cueMove 1.8s ease-in-out infinite;} }
+  @keyframes cueMove{0%{transform:translateY(0);opacity:1;}70%{transform:translateY(10px);opacity:0;}100%{opacity:0;}}
+
+  /* ---- Section shell + watermark parallax ---- */
+  section{padding:7rem 0;position:relative;overflow:hidden;}
+  .watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:900;font-size:clamp(4.5rem,20vw,13rem);color:rgba(255,255,255,.035);letter-spacing:.04em;white-space:nowrap;z-index:0;pointer-events:none;user-select:none;will-change:transform;}
+  .section-head{max-width:640px;margin-bottom:3.4rem;}
+  .section-head h2{font-family:var(--font-display);font-weight:600;font-size:clamp(1.9rem,4vw,2.7rem);margin-top:.6rem;color:#f1e6cf;}
+  .divider{width:56px;height:2px;background:linear-gradient(90deg,var(--ember),var(--frost));margin:1.6rem 0;}
+
+  /* ---- Houses ---- */
+  .houses{background:var(--void-2);border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);}
+  .house-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.4rem;}
+  @media (max-width:980px){.house-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.house-grid{grid-template-columns:1fr;}}
+  .tilt-card{background:var(--void-3);border:1px solid var(--iron);border-top:3px solid var(--card-color,var(--ember));padding:2.2rem 1.6rem 2rem;border-radius:3px;opacity:0;transform:translateY(28px);transition:opacity .7s var(--ease),transform .7s var(--ease),border-color .3s,box-shadow .3s;transform-style:preserve-3d;will-change:transform;}
+  .tilt-card.in-view{opacity:1;transform:translateY(0);}
+  .tilt-card:hover{border-color:var(--card-color,var(--ember));box-shadow:0 18px 40px -20px rgba(0,0,0,.6);}
+  .tilt-card.tilting{transition:border-color .3s,box-shadow .3s;}
+  .sigil{width:64px;height:64px;margin-bottom:1.2rem;stroke:var(--card-color,var(--ember));fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+  .sigil path,.sigil circle{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.6s var(--ease);}
+  .tilt-card.in-view .sigil path,.tilt-card.in-view .sigil circle{stroke-dashoffset:0;}
+  .tilt-card h3{font-family:var(--font-display);font-size:1.2rem;color:#f1e6cf;margin-bottom:.3rem;}
+  .house-creature{font-family:var(--font-utility);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--card-color,var(--ember));margin-bottom:.9rem;display:block;}
+  .house-motto{font-style:italic;color:var(--parchment);margin-bottom:.8rem;font-size:1.02rem;}
+  .house-lore{font-size:.92rem;opacity:.75;}
+  
+
+  /* ---- Numbers ---- */
+  .numbers{background:var(--void);text-align:center;}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2.2rem;margin-top:2.6rem;}
+  @media (max-width:760px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+  .stat{opacity:0;transform:translateY(20px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+  .stat.in-view{opacity:1;transform:translateY(0);}
+  .stat-number{font-family:var(--font-display);font-weight:900;font-size:clamp(2.2rem,5vw,3.2rem);background:linear-gradient(90deg,var(--ember),var(--frost));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  .stat-label{font-family:var(--font-utility);font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;opacity:.75;margin-top:.5rem;}
+
+  /* ---- Figures ---- */
+  .figures{background:var(--void-2);border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);}
+  .figure-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.4rem;}
+  @media (max-width:760px){.figure-grid{grid-template-columns:1fr;}}
+  .figure-card{display:flex;gap:1.3rem;align-items:flex-start;}
+  .avatar{width:64px;height:64px;min-width:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:600;font-size:1.3rem;color:var(--void);background:linear-gradient(135deg,var(--card-color,var(--ember)),rgba(255,255,255,.5));}
+  .figure-name{font-family:var(--font-display);font-size:1.1rem;color:#f1e6cf;}
+  .figure-role{font-family:var(--font-utility);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--card-color,var(--ember));margin:.25rem 0 .6rem;display:block;}
+  .figure-bio{font-size:.92rem;opacity:.78;}
+
+  /* ---- Chronicle ---- */
+  .chronicle-track{position:relative;padding-left:2.6rem;}
+  .chronicle-line-bg{position:absolute;left:0;top:6px;bottom:6px;width:1px;background:var(--iron);}
+  .chronicle-line-fill{position:absolute;left:0;top:6px;width:1px;height:0%;background:linear-gradient(180deg,var(--ember),var(--frost));transition:height .1s linear;}
+  .chronicle-item{position:relative;padding:0 0 3rem 0;opacity:0;transform:translateX(-16px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+  .chronicle-item.in-view{opacity:1;transform:translateX(0);}
+  .chronicle-item:last-child{padding-bottom:0;}
+  .chronicle-item::before{content:attr(data-num);position:absolute;left:-2.6rem;top:0;width:2.4rem;font-family:var(--font-utility);font-size:.8rem;color:var(--void);background:var(--frost);text-align:center;line-height:1.9rem;height:1.9rem;border-radius:50%;}
+  .chronicle-item h3{font-family:var(--font-display);font-size:1.3rem;color:#f1e6cf;margin-bottom:.5rem;}
+  .chronicle-item p{opacity:.8;max-width:560px;}
+
+  /* ---- Raven ---- */
+  .raven-section{background:linear-gradient(180deg,var(--void),#0a0c14);text-align:center;}
+  .raven-flight{position:relative;height:120px;margin-bottom:1rem;}
+  #ravenSvg{position:absolute;top:20px;left:-10%;width:52px;height:34px;fill:var(--parchment);opacity:.9;transition:left 2.4s var(--ease),transform 2.4s var(--ease);}
+  .raven-flight.flown #ravenSvg{left:105%;transform:translateY(-30px) rotate(-4deg);}
+  .raven-form{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:2rem;}
+  .raven-form input{background:var(--void-3);border:1px solid var(--iron);color:var(--parchment);padding:.85rem 1.1rem;font-family:var(--font-body);min-width:240px;border-radius:2px;}
+  .raven-form input:focus{border-color:var(--frost);}
+  .raven-msg{margin-top:1rem;font-family:var(--font-utility);letter-spacing:.08em;font-size:.85rem;color:var(--frost);min-height:1.2em;}
+
+  footer{padding:2.6rem 6vw;text-align:center;border-top:1px solid rgba(255,255,255,.06);font-size:.82rem;opacity:.6;position:relative;z-index:2;}
+  .fade-up{opacity:0;transform:translateY(24px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+  .fade-up.in-view{opacity:1;transform:translateY(0);}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.4ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+  }
+
+    </style>
+    
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to content</a>
+
+<div class="scroll-track"><div class="scroll-fill" id="scrollFill"></div></div>
+<div class="tint-layer tint-warm" id="tintWarm"></div>
+<div class="tint-layer tint-cool" id="tintCool"></div>
+
+<header id="siteHeader">
+  <a href="#top" class="logo">Winter Is Coming</a>
+  <nav class="primary-nav" id="primaryNav">
+    <ul>
+      <li><a href="#houses" data-nav>Houses</a></li>
+      <li><a href="#figures" data-nav>Figures</a></li>
+      <li><a href="#chronicle" data-nav>Chronicle</a></li>
+      <li><a href="#raven" data-nav>The Raven</a></li>
+    </ul>
+  </nav>
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+</header>
+<main id="main">
+
+  <section class="hero" id="top">
+    <canvas id="particleCanvas"></canvas>
+    <div class="hero-inner">
+      <span class="eyebrow">An Original Dark-Fantasy revan</span>
+      <h1 class="hero-title" aria-label="Winterfall">
+        <span class="flame" style="animation-delay:.15s">W</span>
+        <span class="flame" style="animation-delay:.4s">I</span>
+        <span class="flame" style="animation-delay:.25s">N</span>
+        <span class="flame" style="animation-delay:.3s">T</span>
+        <span class="flame" style="animation-delay:.35s">E</span>
+        <span class="frost" style="animation-delay:.4s">R</span>
+        <span class="frost" style="animation-delay:.45s">F</span>
+        <span class="frost" style="animation-delay:.5s">A</span>
+        <span class="frost" style="animation-delay:.55s">L</span>
+        <span class="flame" style="animation-delay:.25s">L</span>
+      </h1>
+      <p class="hero-sub">Two elements. One throne. Neither side yields — until the ravens fly and the houses choose.</p>
+      <div class="cta-row">
+        <a class="btn-primary" href="#houses">Enter the RAVEN</a>
+        <a class="btn-ghost" href="#chronicle">Read the chronicle</a>
+      </div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true"></div>
+    
+  </section>
+  <section class="houses" id="houses">
+    <span class="watermark" data-parallax="0.08">HOUSES</span>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">The Great Houses</span>
+        <h2>Four banners, one fractured crown</h2>
+      </div>
+      <div class="house-grid">
+
+        <article class="tilt-card" style="--card-color:var(--ember)">
+          <svg class="sigil" viewBox="0 0 120 120">
+            <path pathLength="1" d="M60,15 C75,10 85,25 78,40 C90,45 95,60 82,68 C90,75 88,92 70,95 C74,80 62,78 58,88 C50,78 55,65 45,62 C35,58 32,45 42,40 C36,30 45,15 60,15 Z"/>
+          </svg>
+          <span class="house-creature">The Dragon</span>
+          <h3>House Emberholt</h3>
+          <p class="house-motto">"Fire Remembers"</p>
+          <p class="house-lore">Keepers of the old flame-forges, said to have hatched the last dragon eggs in secret.</p>
+        </article>
+
+        <article class="tilt-card" style="--card-color:var(--frost)">
+          <svg class="sigil" viewBox="0 0 120 120">
+            <path pathLength="1" d="M60,100 L45,60 L50,55 L40,35 L55,40 L58,20 L65,40 L80,35 L70,55 L75,60 Z"/>
+          </svg>
+          <span class="house-creature">The Wolf</span>
+          <h3>House Frostmere</h3>
+          <p class="house-motto">"The Cold Keeps Faith"</p>
+          <p class="house-lore">Rulers of the northern marches, who measure loyalty in winters survived together.</p>
+        </article>
+
+        <article class="tilt-card" style="--card-color:var(--teal)">
+          <svg class="sigil" viewBox="0 0 120 120">
+            <path pathLength="1" d="M60,60 C60,40 80,40 80,60 C80,80 55,80 55,55 C55,25 95,25 95,65 C95,95 50,100 40,70"/>
+            <path pathLength="1" d="M60,60 C50,70 35,65 38,50 C40,38 55,35 58,45"/>
+          </svg>
+          <span class="house-creature">The Kraken</span>
+          <h3>House Tidewrack</h3>
+          <p class="house-motto">"What Sinks, Endures"</p>
+          <p class="house-lore">Lords of the drowned coastline, whose fleets are rumored to answer to older things below.</p>
+        </article>
+
+        <article class="tilt-card" style="--card-color:var(--violet)">
+          <svg class="sigil" viewBox="0 0 120 120">
+            <path pathLength="1" d="M20,90 C35,60 50,40 60,25 C70,40 85,60 100,90"/>
+            <circle pathLength="1" cx="60" cy="16" r="5"/>
+          </svg>
+          <span class="house-creature">The Falcon</span>
+          <h3>House Duskfall</h3>
+          <p class="house-motto">"We Watch From Above"</p>
+          <p class="house-lore">Masters of the sky-keeps, whose spies carry more secrets than any court can hold.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="numbers" id="numbers">
+    <span class="watermark" data-parallax="-0.06">REALM</span>
+    <div class="wrap">
+      <div class="section-head" style="margin-inline:auto;text-align:center;">
+        <span class="eyebrow">The Realm in Numbers</span>
+        <h2>What three centuries have cost</h2>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><span class="stat-number" data-target="4" data-suffix="">0</span><span class="stat-label">Great Houses</span></div>
+        <div class="stat"><span class="stat-number" data-target="300" data-suffix="+">0</span><span class="stat-label">Years of Long Winter</span></div>
+        <div class="stat"><span class="stat-number" data-target="9" data-suffix="">0</span><span class="stat-label">Pretenders to the Throne</span></div>
+        <div class="stat"><span class="stat-number" data-target="12" data-suffix="">0</span><span class="stat-label">Ravens Sent This Moon</span></div>
+      </div>
+    </div>
+  </section>
+
+  
+
+  </main>
+  <section class="figures" id="figures">
+    <span class="watermark" data-parallax="0.08">FIGURES</span>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Figures of the Realm</span>
+        <h2>The names behind the banners</h2>
+      </div>
+      <div class="figure-grid">
+
+        <div class="figure-card fade-up" style="--card-color:var(--ember)">
+          <div class="avatar">S</div>
+          <div>
+            <span class="figure-name">Sera Emberholt</span>
+            <span class="figure-role">The Last Flamekeeper</span>
+            <p class="figure-bio">Guardian of the flame-forges, and the only living soul who claims to know where the final eggs are hidden.</p>
+          </div>
+        </div>
+
+        <div class="figure-card fade-up" style="--card-color:var(--frost)">
+          <div class="avatar">A</div>
+          <div>
+            <span class="figure-name">Aldric Frostmere</span>
+            <span class="figure-role">The Silent Warden</span>
+            <p class="figure-bio">Commander of the northern watch, who has not spoken a word of politics since the winter took his brother.</p>
+          </div>
+        </div>
+
+        <div class="figure-card fade-up" style="--card-color:var(--teal)">
+          <div class="avatar">M</div>
+          <div>
+            <span class="figure-name">Mira Tidewrack</span>
+            <span class="figure-role">The Drowned Admiral</span>
+            <p class="figure-bio">She sailed into a storm that sank three rival fleets and returned alone, three days later, unharmed.</p>
+          </div>
+        </div>
+
+        <div class="figure-card fade-up" style="--card-color:var(--violet)">
+          <div class="avatar">C</div>
+          <div>
+            <span class="figure-name">Corvin Duskfall</span>
+            <span class="figure-role">Master of Ravens</span>
+            <p class="figure-bio">No letter crosses the realm without passing through his hands first — and, some say, his eyes.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="chronicle" id="chronicle">
+    <span class="watermark" data-parallax="-0.08">CHRONICLE</span>
+    
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">The Chronicle</span>
+        <h2>Three eras of the realm</h2>
+      </div>
+      <div class="chronicle-track">
+        <div class="chronicle-line-bg"></div>
+        <div class="chronicle-line-fill" id="chronicleFill"></div>
+        <div class="chronicle-item" data-num="01">
+          <h3>The Long Winter</h3>
+          <p>For three hundred years the frost held the realm in a truce built on fear rather than peace — every house armed, none willing to strike first.</p>
+        </div>
+        <div class="chronicle-item" data-num="02">
+          <h3>The Dragon's Reign</h3>
+          <p>Fire returned to the world before anyone was ready for it, and the throne changed hands more times in a decade than in the three centuries prior.</p>
+        </div>
+        <div class="chronicle-item" data-num="03">
+          <h3>the unuse place</h3>
+          <p>Now the embers cool and the frost creeps south again. The ravens are flying. No one believes the peace will outlast the winter.</p>
+        </div>
+        
+        
+      </div>
+    </div>
+  </section>
+  <section class="raven-section" id="raven">
+    <span class="watermark" data-parallax="0.06">RAVEN</span>
+    <div class="wrap">
+      <span class="eyebrow fade-up">The Raven</span>
+      <h2 class="fade-up" style="font-family:var(--font-display);font-weight:600;font-size:clamp(1.9rem,4vw,2.7rem);margin:.6rem 0 2rem;color:#f1e6cf;">Send word across the realm</h2>
+      <div class="raven-flight" id="ravenFlight">
+        <svg id="ravenSvg" viewBox="0 0 100 60" aria-hidden="true">
+          <path d="M50,30 C40,10 15,8 0,20 C18,22 30,28 38,34 C24,34 10,40 2,50 C22,48 38,42 50,44 C62,42 78,48 98,50 C90,40 76,34 62,34 C70,28 82,22 100,20 C85,8 60,10 50,30 Z"/>
+        </svg>
+      </div>
+      <form class="raven-form" id="ravenForm">
+        <label for="ravenEmail" style="position:absolute;left:-9999px;">Your correspondence address</label>
+        <input type="email" id="ravenEmail" placeholder="your.name@theseven.realm" required>
+        <button type="submit" class="btn-primary">Send the Raven</button>
+      </form>
+      <p class="raven-msg" id="ravenMsg" role="status"></p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Emberfall is an original fictional world created for this demo — not affiliated with any existing series, book, or studio.</p>
+</footer>
+</header>
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var pointerFine = window.matchMedia('(pointer: fine)').matches;
+
+  /* ---- Mobile nav ---- */
+  var toggle = document.getElementById('navToggle');
+  var nav = document.getElementById('primaryNav');
+  toggle.addEventListener('click', function(){
+    var open = nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open);
+  });
+  nav.querySelectorAll('a').forEach(function(link){
+    link.addEventListener('click', function(){ nav.classList.remove('open'); });
+  });
+
+  /* ---- Active nav highlight ---- */
+  var navLinks = document.querySelectorAll('[data-nav]');
+  var navSections = ['houses','figures','chronicle','raven'].map(function(id){ return document.getElementById(id); });
+  if('IntersectionObserver' in window){
+    var navIO = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          navLinks.forEach(function(l){ l.classList.remove('active'); });
+          var match = document.querySelector('[data-nav][href="#'+entry.target.id+'"]');
+          if(match) match.classList.add('active');
+        }
+      });
+    }, { rootMargin:'-45% 0px -45% 0px' });
+    navSections.forEach(function(s){ if(s) navIO.observe(s); });
+  }
+
+  /* ---- Scroll reveal ---- */
+  var revealTargets = document.querySelectorAll('.tilt-card, .chronicle-item, .fade-up, .stat');
+  var counted = new WeakSet();
+
+  function animateCount(el){
+    if(counted.has(el)) return;
+    counted.add(el);
+    var target = parseFloat(el.getAttribute('data-target'));
+    var suffix = el.getAttribute('data-suffix') || '';
+    var t0 = null, duration = 1300;
+    function step(ts){
+      if(!t0) t0 = ts;
+      var p = Math.min((ts - t0) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.floor(eased * target) + suffix;
+      if(p < 1) requestAnimationFrame(step);
+      else el.textContent = target + suffix;
+    }
+    requestAnimationFrame(step);
+  }
+
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          if(entry.target.classList.contains('stat')){
+            var numEl = entry.target.querySelector('.stat-number');
+            if(numEl) animateCount(numEl);
+          }
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold:.2 });
+    revealTargets.forEach(function(el){ io.observe(el); });
+
+    var ravenFlight = document.getElementById('ravenFlight');
+    var ravenIO = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('flown');
+          ravenIO.unobserve(entry.target);
+        }
+      });
+    }, { threshold:.5 });
+    ravenIO.observe(ravenFlight);
+  } else {
+    revealTargets.forEach(function(el){
+      el.classList.add('in-view');
+      if(el.classList.contains('stat')){
+        var n = el.querySelector('.stat-number');
+        if(n) n.textContent = n.getAttribute('data-target') + (n.getAttribute('data-suffix')||'');
+      }
+    });
+    document.getElementById('ravenFlight').classList.add('flown');
+  }
+
+  /* ---- Raven form (visual demo only, no backend) ---- */
+  document.getElementById('ravenForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    document.getElementById('ravenMsg').textContent = 'Your raven has taken flight.';
+    document.getElementById('ravenEmail').value = '';
+  });
+
+  /* ---- Tilt interaction on cards ---- */
+  if(pointerFine && !reduceMotion){
+    document.querySelectorAll('.tilt-card').forEach(function(card){
+      card.addEventListener('mousemove', function(e){
+        card.classList.add('tilting');
+        var r = card.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width - 0.5;
+        var py = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = 'translateY(0) rotateX(' + (py * -8) + 'deg) rotateY(' + (px * 8) + 'deg) scale(1.02)';
+      });
+      card.addEventListener('mouseleave', function(){
+        card.classList.remove('tilting');
+        card.style.transform = '';
+      });
+    });
+  }
+
+  /* ---- Centralised scroll-driven effects (rAF throttled) ---- */
+  var scrollFill = document.getElementById('scrollFill');
+  var tintWarm = document.getElementById('tintWarm');
+  var tintCool = document.getElementById('tintCool');
+  var heroCanvasEl = document.getElementById('particleCanvas');
+  var heroInner = document.querySelector('.hero-inner');
+  var heroEl = document.querySelector('.hero');
+  var chronicleFill = document.getElementById('chronicleFill');
+  var chronicleSection = document.getElementById('chronicle');
+  var watermarks = document.querySelectorAll('.watermark');
+  var ticking = false;
+
+  function onScrollFrame(){
+    ticking = false;
+    var scrollY = window.scrollY || window.pageYOffset;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docHeight > 0 ? Math.min(Math.max(scrollY / docHeight, 0), 1) : 0;
+
+    if(scrollFill) scrollFill.style.width = (pct * 100) + '%';
+    if(tintWarm) tintWarm.style.opacity = (0.14 * (1 - pct)).toFixed(3);
+    if(tintCool) tintCool.style.opacity = (0.16 * pct).toFixed(3);
+
+    document.getElementById('siteHeader').classList.toggle('scrolled', scrollY > 40);
+
+    if(!reduceMotion && heroEl){
+      var heroH = heroEl.offsetHeight;
+      if(scrollY < heroH){
+        if(heroCanvasEl) heroCanvasEl.style.transform = 'translateY(' + (scrollY * 0.06) + 'px)';
+        if(heroInner) heroInner.style.transform = 'translateY(' + (scrollY * 0.18) + 'px)';
+      }
+    }
+
+    if(!reduceMotion){
+      watermarks.forEach(function(wm){
+        var factor = parseFloat(wm.getAttribute('data-parallax')) || 0.08;
+        var rect = wm.parentElement.getBoundingClientRect();
+        var centerOffset = rect.top + rect.height / 2 - window.innerHeight / 2;
+        wm.style.transform = 'translate(-50%, calc(-50% + ' + (centerOffset * factor * -1) + 'px))';
+      });
+    }
+
+    if(chronicleFill && chronicleSection){
+      var cRect = chronicleSection.getBoundingClientRect();
+      var cProgress = (window.innerHeight * 0.75 - cRect.top) / (cRect.height);
+      cProgress = Math.min(Math.max(cProgress, 0), 1);
+      chronicleFill.style.height = (cProgress * 100) + '%';
+    }
+  }
+
+  function requestTick(){
+    if(!ticking){
+      ticking = true;
+      requestAnimationFrame(onScrollFrame);
+    }
+  }
+
+  window.addEventListener('scroll', requestTick, { passive:true });
+  window.addEventListener('resize', requestTick);
+  onScrollFrame();
+
+  /* ---- Ambient particle canvas (hero) ---- */
+  var canvas = document.getElementById('particleCanvas');
+  if(!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var hero = canvas.closest('.hero');
+  var particles = [];
+
+  function size(){
+    canvas.width = hero.clientWidth;
+    canvas.height = hero.clientHeight;
+  }
+
+  function makeParticles(){
+    particles = [];
+    if(reduceMotion) return;
+    var count = Math.min(70, Math.floor(canvas.width / 16));
+    for(var i=0;i<count;i++){
+      var warm = Math.random() < 0.5;
+      particles.push({
+        x: Math.random()*canvas.width,
+        y: Math.random()*canvas.height,
+        r: Math.random()*2 + .6,
+        speed: Math.random()*.6 + .15,
+        drift: (Math.random()-.5)*.4,
+        warm: warm,
+        alpha: Math.random()*.5 + .2
+      });
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(function(p){
+      p.y -= p.warm ? p.speed : -p.speed*0.6;
+      p.x += p.drift;
+      if(p.y < -10) p.y = canvas.height + 10;
+      if(p.y > canvas.height + 10) p.y = -10;
+      if(p.x < -10) p.x = canvas.width + 10;
+      if(p.x > canvas.width + 10) p.x = -10;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = p.warm
+        ? 'rgba(255,106,61,' + p.alpha + ')'
+        : 'rgba(143,216,255,' + p.alpha + ')';
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  size();
+  makeParticles();
+  if(!reduceMotion){ draw(); } else { ctx.clearRect(0,0,canvas.width,canvas.height); }
+
+  window.addEventListener('resize', function(){ size(); makeParticles(); });
+})();
+</script>
+</body>
+</html>
